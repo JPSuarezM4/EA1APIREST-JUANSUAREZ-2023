@@ -85,4 +85,5 @@ const updateInventarioByID = async (req = request,
 }
 
 
+
 module.exports = { createInventario, getInventarios, updateInventarioByID}

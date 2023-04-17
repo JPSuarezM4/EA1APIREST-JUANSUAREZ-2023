@@ -49,7 +49,7 @@ const { db } = require('../models/usuario')
 
         if (!usuario) {
             return res.status(404).json({
-                msg: 'Tipo de Equipo no encontrado'
+                msg: 'usuario no encontrado'
             })
         }
 

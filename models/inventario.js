@@ -45,7 +45,12 @@ const InventarioSchema = Schema({
         type: Schema.Types.ObjectId,
         ref: 'TipoEquipo',
         required: true
-    }
+    },
+    estado: {
+        type: Boolean,
+        default: true,
+        required: true
+    },
 })
 
 module.exports = model('Inventario', InventarioSchema)
