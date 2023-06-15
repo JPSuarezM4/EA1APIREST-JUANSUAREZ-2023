@@ -1,16 +1,18 @@
 const { Router } = require('express')
-const { createInventario, getInventarios, updateInventarioByID} =
- require('../controllers/inventario')
+const { createInventario, getInventarios, updateInventarioByID} = require('../controllers/inventario')
+const { verificarToken } = require('../middlewares/autenticacion');
+const { verificarPermisoAdministrador } = require('../middlewares/administrador');
+const { verificarRolDocente } = require('../middlewares/docente');
 
 const router = Router()
 
 // crear
-router.post('/', createInventario)
+router.post('/',verificarToken, verificarPermisoAdministrador, createInventario)
 
 // consultar todos
-router.get('/', getInventarios)
+router.get('/',verificarToken,verificarPermisoAdministrador, getInventarios)
 
 // editar inventario
-router.get('/', updateInventarioByID)
+router.get('/',verificarToken, verificarPermisoAdministrador, updateInventarioByID)
 
 module.exports = router;

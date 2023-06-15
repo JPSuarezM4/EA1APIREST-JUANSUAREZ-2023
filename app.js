@@ -20,6 +20,7 @@ const estadoEquipo = require('./routes/estadoEquipo')
 const usuario = require('./routes/usuario')
 const marca = require('./routes/marca')
 const inventario = require('./routes/inventario')
+const auth = require('./routes/auth')
 
 //URI O endpoint
 app.use('/api/tipoequipos', tipoEquipo)
@@ -27,6 +28,7 @@ app.use('/api/estadoequipos', estadoEquipo)
 app.use('/api/usuarios', usuario)
 app.use('/api/marcas', marca)
 app.use('/api/inventarios', inventario)
+app.use('/api/auth', auth)
 
 
 module.exports = app

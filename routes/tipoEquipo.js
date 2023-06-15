@@ -1,18 +1,19 @@
 const { Router } = require('express')
 const { createTipoEquipo, getTipoEquipos, updateTipoEquipo } = require('../controllers/tipoEquipo')
-
+const { verificarToken } = require('../middlewares/autenticacion');
+const { verificarPermisoAdministrador } = require('../middlewares/administrador');
 
 const router = Router()
 
 
 // crear
-router.post('/', createTipoEquipo)
+router.post('/', verificarToken, verificarPermisoAdministrador, createTipoEquipo)
 
 // editar
-router.put('/:id', updateTipoEquipo)
+router.put('/:id', verificarToken, verificarPermisoAdministrador, updateTipoEquipo)
 
 // listar
-router.get('/', getTipoEquipos)
+router.get('/',verificarToken, verificarPermisoAdministrador, getTipoEquipos)
 
 
 

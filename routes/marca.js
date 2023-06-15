@@ -1,18 +1,19 @@
 const { Router } = require('express')
 const { createMarca, getMarcas, updateMarca } = require('../controllers/marca')
-
+const { verificarToken } = require('../middlewares/autenticacion');
+const { verificarPermisoAdministrador } = require('../middlewares/administrador');
 
 const router = Router()
 
 
 // crear
-router.post('/', createMarca)
+router.post('/',verificarToken, verificarPermisoAdministrador, createMarca)
 
 // editar
-router.put('/:id', updateMarca)
+router.put('/:id',verificarToken, verificarPermisoAdministrador, updateMarca)
 
 // listar
-router.get('/', getMarcas)
+router.get('/',verificarToken, verificarPermisoAdministrador, getMarcas)
 
 
 

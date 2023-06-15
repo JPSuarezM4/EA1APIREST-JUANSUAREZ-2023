@@ -1,93 +1,104 @@
-const Usuario = require('../models/usuario')
-const {request, response} = require('express')
-const { db } = require('../models/usuario')
+const Usuario = require('../models/usuario');
+const { request, response } = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 /**
- * Creacion
+ * Creación de usuario
  */
- const createUsuario = async (req = request, res = response ) => {
-    
-    try{
-        const nombre = req.body.nombre
-        ? req.body.nombre.toUpperCase()
-        : ''
-        const email = req.body.email
-        ? req.body.email.toUpperCase()
-        : ''
-        const usuarioBD = await Usuario.findOne({nombre})
-        if(usuarioBD){
-            return res.status(400).json({msg: 'Ya existe'})
-        }
-        const data = {
-            nombre,
-            email
-        }
-        const usuario = new Usuario(data)
-        //console.log(usuario)
-        await usuario.save()
-        return res.status(201).json(usuario)
-    }catch(e){
-        return res.status(500).json({
-            msg: e
-        })
+const createUsuario = async (req = request, res = response) => {
+  try {
+    const { nombre, email, contraseña, rol } = req.body;
+
+    // Verificar si el usuario ya existe en la base de datos
+    const usuarioExistente = await Usuario.findOne({ email });
+    if (usuarioExistente) {
+      return res.status(400).json({ msg: 'El usuario ya existe' });
     }
-}
 
+    // Encriptar la contraseña antes de guardarla en la base de datos
+    const salt = await bcrypt.genSalt(10);
+    const contraseñaEncriptada = await bcrypt.hash(contraseña, salt);
 
+    const nuevoUsuario = new Usuario({
+      nombre,
+      email,
+      contraseña: contraseñaEncriptada,
+      rol,
+    });
 
-
-/**
- * Actualización
- */
- const updateUsuario = async (req = request, res = response ) => {
     
-    try{
-        const { id } = req.params
-        const { estado, email, nombre } = req.body
 
-        const usuario = await Usuario.findById(id)
-
-        if (!usuario) {
-            return res.status(404).json({
-                msg: 'usuario no encontrado'
-            })
-        }
-
-        usuario.estado = estado
-        usuario.email = email ? email.toUpperCase(): usuario.email
-        usuario.nombre = nombre ? nombre.toUpperCase() : usuario.nombre
-        usuario.fechaActualizacion = new Date()
+    // Generar el token de autenticación
+    const token = jwt.sign(
+      { usuario: nuevoUsuario._id },
+      'secreto', // Reemplaza 'secreto' con tu propia clave secreta
+      { expiresIn: '10h' }// Opcional: tiempo de expiración del token
       
-        await usuario.save()
+    );
+      console.log(token)
 
-        return res.json(usuario)
+     // Asignar el token al usuario
+     nuevoUsuario.token = token;
 
-    }catch(e){
-        return res.status(500).json({
-            msg: e
-        })
+     await nuevoUsuario.save();
+ 
+     return res.status(201).json({ usuario: nuevoUsuario, token });
+   } catch (e) {
+     return res.status(500).json({ msg: 'Error al crear el usuario' });
+   }
+ };
+
+
+ /*
+ * Actualización de usuario
+ */
+const updateUsuario = async (req = request, res = response) => {
+  try {
+    const { id } = req.params;
+    const { estado, email, nombre, rol, contraseña } = req.body;
+
+    const usuario = await Usuario.findById(id);
+
+    if (!usuario) {
+      return res.status(404).json({ msg: 'Usuario no encontrado' });
     }
-}
+
+    console.log('Usuario encontrado:', usuario);
+
+    usuario.estado = estado;
+    usuario.email = email ? email.toUpperCase() : usuario.email;
+    usuario.nombre = nombre ? nombre.toUpperCase() : usuario.nombre;
+    usuario.rol = rol !== undefined ? rol : usuario.rol;
+    usuario.fechaActualizacion = new Date();
+
+    // Actualizar la contraseña solo si se proporciona en la solicitud
+    if (contraseña) {
+      usuario.contraseña = contraseña;
+    }
+    await usuario.save();
+
+    return res.json(usuario);
+  } catch (e) {
+    return res.status(500).json({ msg: 'Error al actualizar el usuario' });
+  }
+};
+
 
 
 /**
- * Listar Todos
+ * Listar todos los usuarios
  */
- const getUsuarios = async (req = request,
-    res = response) => {
-    try{
-        const { estado } = req.query;
+const getUsuarios = async (req = request, res = response) => {
+  try {
+    const { estado } = req.query;
 
+    const usuariosDB = await Usuario.find({ estado });
 
-        const usuariosDB = await Usuario.find({estado})
-        //select * from usuario where estado = ?;
-        return res.json(usuariosDB)
-    }catch(e){
-        return res.status(500).json({
-            msg: e
-        })
-    }
-}
+    return res.json(usuariosDB);
+  } catch (e) {
+    return res.status(500).json({ msg: 'Error al obtener los usuarios' });
+  }
+};
 
-
-module.exports = {createUsuario, getUsuarios, updateUsuario}
+module.exports = { createUsuario, getUsuarios, updateUsuario };

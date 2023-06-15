@@ -1,5 +1,4 @@
-const { Schema, model } = require('mongoose')
-
+const { Schema, model } = require('mongoose');
 
 const MarcaSchema = Schema({
     nombre: {
@@ -19,7 +18,6 @@ const MarcaSchema = Schema({
         type: Date,
         default: new Date()
     },
-})
+});
 
-
-module.exports = model('Marca', MarcaSchema)
+module.exports = model('Marca', MarcaSchema);
